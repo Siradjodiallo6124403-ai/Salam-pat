@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SalamPay — Paiement marchand en ligne</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── TOKENS ────────────────────────────────────────────────── */
+    :root {
+      --gold:        #C9A84C;
+      --gold-light:  #E8C97A;
+      --gold-pale:   #F5EDD5;
+      --gold-dark:   #8B6914;
+      --white:       #FFFFFF;
+      --off-white:   #F8F7F4;
+      --black:       #0A0A0A;
+      --gray:        #6B6B6B;
+      --gray-light:  #E8E8E8;
+      --font-display: 'Playfair Display', serif;
+      --font-body:    'Inter', sans-serif;
+      --radius:       12px;
+      --shadow-gold:  0 8px 32px rgba(201,168,76,0.18);
+      --shadow-card:  0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    /* ── RESET ─────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      color: var(--black);
+      background: var(--white);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── NAVBAR ────────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 6%;
+      height: 72px;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(201,168,76,0.15);
+      transition: box-shadow 0.3s;
+    }
+    nav.scrolled { box-shadow: 0 2px 24px rgba(0,0,0,0.08); }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo-mark {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--white);
+      letter-spacing: -1px;
+    }
+    .nav-logo-text {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--black);
+    }
+    .nav-logo-text span { color: var(--gold); }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      list-style: none;
+    }
+    .nav-links a {
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray);
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--black); }
+
+    .nav-cta {
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: var(--white) !important;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-weight: 600 !important;
+      transition: opacity 0.2s, transform 0.2s !important;
+    }
+    .nav-cta:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* ── HERO ──────────────────────────────────────────────────── */
+    #accueil {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      background: var(--black);
+    }
+
+    /* Arabesque SVG background pattern */
+    .hero-pattern {
+      position: absolute;
+      inset: 0;
+      opacity: 0.07;
+      background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23C9A84C' stroke-width='1'%3E%3Ccircle cx='40' cy='40' r='30'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3Ccircle cx='40' cy='40' r='10'/%3E%3Cline x1='10' y1='40' x2='70' y2='40'/%3E%3Cline x1='40' y1='10' x2='40' y2='70'/%3E%3Cline x1='18.8' y1='18.8' x2='61.2' y2='61.2'/%3E%3Cline x1='61.2' y1='18.8' x2='18.8' y2='61.2'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: 80px 80px;
+    }
+
+    /* Gold glow orb */
+    .hero-orb {
+      position: absolute;
+      width: 600px; height: 600px;
+      right: -100px; top: 50%;
+      transform: translateY(-50%);
+      background: radial-gradient(circle, rgba(201,168,76,0.25) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 120px 6% 80px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 80px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(201,168,76,0.12);
+      border: 1px solid rgba(201,168,76,0.3);
+      color: var(--gold-light);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 100px;
+      margin-bottom: 28px;
+    }
+    .hero-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--gold);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(42px, 5vw, 68px);
+      font-weight: 900;
+      line-height: 1.08;
+      color: var(--white);
+      margin-bottom: 24px;
+    }
+    .hero-title .gold { color: var(--gold); }
+    .hero-title .outline {
+      -webkit-text-stroke: 2px var(--gold);
+      color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 17px;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.7;
+      max-width: 460px;
+      margin-bottom: 40px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: var(--white);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 15px;
+      padding: 14px 28px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(201,168,76,0.4);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(201,168,76,0.5); }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      color: var(--white);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 15px;
+      padding: 14px 28px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.2);
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .btn-secondary:hover { border-color: var(--gold); background: rgba(201,168,76,0.08); }
+
+    /* Hero visual */
+    .hero-visual {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .dashboard-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(201,168,76,0.15);
+      border-radius: 16px;
+      padding: 24px;
+      backdrop-filter: blur(12px);
+    }
+
+    .dash-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .dash-title { font-size: 12px; color: rgba(255,255,255,0.4); font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
+    .dash-status {
+      font-size: 11px;
+      font-weight: 600;
+      color: #4ADE80;
+      background: rgba(74,222,128,0.1);
+      padding: 3px 10px;
+      border-radius: 100px;
+    }
+
+    .dash-amount {
+      font-family: var(--font-display);
+      font-size: 38px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+    .dash-amount span { font-size: 20px; color: var(--gold); }
+    .dash-change { font-size: 13px; color: #4ADE80; }
+
+    /* Mini bar chart */
+    .mini-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      height: 48px;
+      margin-top: 16px;
+    }
+    .bar {
+      flex: 1;
+      background: rgba(201,168,76,0.15);
+      border-radius: 4px;
+      position: relative;
+      transition: background 0.2s;
+    }
+    .bar:hover { background: rgba(201,168,76,0.3); }
+    .bar.active { background: linear-gradient(to top, var(--gold-dark), var(--gold-light)); }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .stat-mini {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(201,168,76,0.1);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .stat-mini-label { font-size: 11px; color: rgba(255,255,255,0.4); margin-bottom: 6px; }
+    .stat-mini-value { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--white); }
+    .stat-mini-value small { font-size: 12px; color: var(--gold); font-family: var(--font-body); }
+
+    /* Transaction feed */
+    .tx-list { display: flex; flex-direction: column; gap: 10px; }
+    .tx-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+    }
+    .tx-left { display: flex; align-items: center; gap: 10px; }
+    .tx-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: rgba(201,168,76,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+    .tx-name { font-size: 13px; color: var(--white); font-weight: 500; }
+    .tx-time { font-size: 11px; color: rgba(255,255,255,0.35); }
+    .tx-amount { font-size: 14px; font-weight: 600; }
+    .tx-amount.positive { color: #4ADE80; }
+    .tx-amount.negative { color: rgba(255,255,255,0.6); }
+
+    /* Hero stats bar */
+    .hero-stats {
+      display: flex;
+      gap: 32px;
+      margin-top: 40px;
+      padding-top: 32px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .hero-stat-value {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--white);
+    }
+    .hero-stat-value span { color: var(--gold); }
+    .hero-stat-label { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+    /* ── FEATURES ──────────────────────────────────────────────── */
+    #fonctionnalites {
+      padding: 100px 6%;
+      background: var(--off-white);
+    }
+
+    .section-eyebrow {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(32px, 4vw, 50px);
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--black);
+      max-width: 560px;
+      margin-bottom: 16px;
+    }
+
+    .section-desc {
+      font-size: 16px;
+      color: var(--gray);
+      max-width: 540px;
+      line-height: 1.7;
+      margin-bottom: 60px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 36px 32px;
+      border: 1px solid var(--gray-light);
+      transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+      transform: scaleX(0);
+      transition: transform 0.3s;
+      transform-origin: left;
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-card);
+      border-color: rgba(201,168,76,0.2);
+    }
+    .feature-card:hover::after { transform: scaleX(1); }
+
+    .feature-icon {
+      width: 52px; height: 52px;
+      background: linear-gradient(135deg, var(--gold-pale), rgba(201,168,76,0.15));
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .feature-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--black);
+      margin-bottom: 10px;
+    }
+
+    .feature-desc {
+      font-size: 14px;
+      color: var(--gray);
+      line-height: 1.65;
+    }
+
+    /* ── HOW IT WORKS ──────────────────────────────────────────── */
+    #comment-ca-marche {
+      padding: 100px 6%;
+      background: var(--black);
+      position: relative;
+      overflow: hidden;
+    }
+    #comment-ca-marche::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23C9A84C' stroke-width='0.5'%3E%3Ccircle cx='40' cy='40' r='30'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3Ccircle cx='40' cy='40' r='10'/%3E%3Cline x1='10' y1='40' x2='70' y2='40'/%3E%3Cline x1='40' y1='10' x2='40' y2='70'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: 80px 80px;
+      opacity: 0.04;
+    }
+    #comment-ca-marche .section-eyebrow { color: var(--gold); }
+    #comment-ca-marche .section-title { color: var(--white); }
+    #comment-ca-marche .section-desc { color: rgba(255,255,255,0.5); }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      position: relative;
+      z-index: 1;
+    }
+    .steps-grid::before {
+      content: '';
+      position: absolute;
+      top: 36px; left: 12.5%; right: 12.5%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0 20px;
+    }
+
+    .step-number {
+      width: 72px; height: 72px;
+      background: rgba(201,168,76,0.1);
+      border: 1px solid rgba(201,168,76,0.3);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 10px;
+    }
+    .step-desc { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.6; }
+
+    /* ── PRICING ───────────────────────────────────────────────── */
+    #tarifs {
+      padding: 100px 6%;
+      background: var(--white);
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+      align-items: start;
+    }
+
+    .pricing-card {
+      border-radius: 16px;
+      padding: 40px 32px;
+      border: 1px solid var(--gray-light);
+      position: relative;
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .pricing-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-card); }
+
+    .pricing-card.featured {
+      background: var(--black);
+      border: none;
+      transform: scale(1.03);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2), 0 0 0 1px rgba(201,168,76,0.3);
+    }
+    .pricing-card.featured:hover { transform: scale(1.03) translateY(-4px); }
+
+    .pricing-badge {
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 5px 16px;
+      border-radius: 100px;
+      white-space: nowrap;
+    }
+
+    .pricing-name {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .pricing-card:not(.featured) .pricing-name { color: var(--black); }
+    .pricing-card.featured .pricing-name { color: var(--white); }
+
+    .pricing-tagline { font-size: 13px; color: var(--gray); margin-bottom: 24px; }
+    .pricing-card.featured .pricing-tagline { color: rgba(255,255,255,0.45); }
+
+    .pricing-amount {
+      margin-bottom: 8px;
+    }
+    .pricing-amount .currency { font-size: 20px; font-weight: 600; color: var(--gold); vertical-align: top; margin-top: 8px; display: inline-block; }
+    .pricing-amount .number {
+      font-family: var(--font-display);
+      font-size: 52px;
+      font-weight: 900;
+      line-height: 1;
+    }
+    .pricing-card:not(.featured) .pricing-amount .number { color: var(--black); }
+    .pricing-card.featured .pricing-amount .number { color: var(--white); }
+    .pricing-amount .unit { font-size: 13px; color: var(--gray); }
+    .pricing-card.featured .pricing-amount .unit { color: rgba(255,255,255,0.4); }
+
+    .pricing-commission {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gold);
+      background: rgba(201,168,76,0.08);
+      border: 1px solid rgba(201,168,76,0.2);
+      padding: 8px 14px;
+      border-radius: 8px;
+      margin-bottom: 28px;
+    }
+
+    .pricing-divider {
+      height: 1px;
+      background: var(--gray-light);
+      margin-bottom: 24px;
+    }
+    .pricing-card.featured .pricing-divider { background: rgba(255,255,255,0.08); }
+
+    .pricing-features { list-style: none; margin-bottom: 32px; display: flex; flex-direction: column; gap: 12px; }
+    .pricing-features li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+    }
+    .pricing-card:not(.featured) .pricing-features li { color: var(--gray); }
+    .pricing-card.featured .pricing-features li { color: rgba(255,255,255,0.7); }
+    .pricing-features li::before {
+      content: '✓';
+      width: 20px; height: 20px;
+      background: rgba(201,168,76,0.15);
+      color: var(--gold);
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .pricing-btn {
+      display: block;
+      text-align: center;
+      padding: 13px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .pricing-btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--gold);
+      color: var(--gold-dark);
+    }
+    .pricing-btn-outline:hover { background: var(--gold-pale); }
+    .pricing-btn-solid {
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: var(--white);
+      box-shadow: 0 4px 16px rgba(201,168,76,0.35);
+    }
+    .pricing-btn-solid:hover { box-shadow: 0 8px 24px rgba(201,168,76,0.5); transform: translateY(-1px); }
+
+    /* ── TRUST ─────────────────────────────────────────────────── */
+    #confiance {
+      padding: 80px 6%;
+      background: var(--gold-pale);
+      text-align: center;
+    }
+
+    .trust-title {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 3.5vw, 42px);
+      font-weight: 700;
+      color: var(--black);
+      margin-bottom: 48px;
+    }
+
+    .trust-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 32px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .trust-stat-val {
+      font-family: var(--font-display);
+      font-size: 42px;
+      font-weight: 900;
+      color: var(--gold-dark);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .trust-stat-label { font-size: 13px; color: var(--gray); font-weight: 500; }
+
+    /* ── CONTACT ───────────────────────────────────────────────── */
+    #contact {
+      padding: 100px 6%;
+      background: var(--off-white);
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 80px;
+      align-items: start;
+    }
+
+    .contact-info-title {
+      font-family: var(--font-display);
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--black);
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+    .contact-info-title span { color: var(--gold); }
+
+    .contact-info-desc { font-size: 15px; color: var(--gray); line-height: 1.7; margin-bottom: 36px; }
+
+    .contact-detail {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .contact-detail-icon {
+      width: 40px; height: 40px;
+      background: rgba(201,168,76,0.1);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .contact-detail-label { font-size: 11px; color: var(--gray); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+    .contact-detail-value { font-size: 15px; color: var(--black); font-weight: 500; }
+
+    /* Form */
+    .contact-form {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 44px;
+      border: 1px solid var(--gray-light);
+      box-shadow: var(--shadow-card);
+    }
+
+    .form-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--black);
+      margin-bottom: 28px;
+    }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--black);
+      margin-bottom: 7px;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 13px 16px;
+      border: 1.5px solid var(--gray-light);
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--black);
+      background: var(--white);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      appearance: none;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+    }
+    .form-group textarea { height: 120px; resize: vertical; }
+    .form-group ::placeholder { color: #BBBBBB; }
+
+    .form-submit {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: var(--white);
+      border: none;
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 16px rgba(201,168,76,0.35);
+    }
+    .form-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(201,168,76,0.5); }
+
+    .form-note {
+      text-align: center;
+      font-size: 12px;
+      color: var(--gray);
+      margin-top: 14px;
+    }
+    .form-note a { color: var(--gold-dark); text-decoration: none; }
+
+    /* ── FOOTER ────────────────────────────────────────────────── */
+    footer {
+      background: var(--black);
+      padding: 64px 6% 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    footer::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23C9A84C' stroke-width='0.5'%3E%3Ccircle cx='40' cy='40' r='30'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3Cline x1='10' y1='40' x2='70' y2='40'/%3E%3Cline x1='40' y1='10' x2='40' y2='70'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: 80px 80px;
+      opacity: 0.03;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 48px;
+      position: relative;
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .footer-logo-text {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--white);
+    }
+    .footer-logo-text span { color: var(--gold); }
+
+    .footer-desc { font-size: 13px; color: rgba(255,255,255,0.35); line-height: 1.7; max-width: 260px; }
+
+    .footer-col-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      margin-bottom: 16px;
+    }
+    .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-links a {
+      text-decoration: none;
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--gold); }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding-top: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+    .footer-copy { font-size: 12px; color: rgba(255,255,255,0.25); }
+    .footer-copy span { color: var(--gold); }
+
+    .footer-socials {
+      display: flex;
+      gap: 10px;
+    }
+    .social-btn {
+      width: 34px; height: 34px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.4);
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .social-btn:hover { background: rgba(201,168,76,0.15); border-color: rgba(201,168,76,0.3); color: var(--gold); }
+
+    /* ── ANIMATIONS ────────────────────────────────────────────── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-up.visible { opacity: 1; transform: none; }
+    .fade-up:nth-child(2) { transition-delay: 0.1s; }
+    .fade-up:nth-child(3) { transition-delay: 0.2s; }
+    .fade-up:nth-child(4) { transition-delay: 0.3s; }
+
+    /* ── RESPONSIVE ────────────────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .hero-content { grid-template-columns: 1fr; gap: 48px; }
+      .hero-visual { max-width: 480px; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .steps-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+      .steps-grid::before { display: none; }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
+      .pricing-card.featured { transform: none; }
+      .trust-stats { grid-template-columns: 1fr 1fr; }
+      .contact-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      nav { padding: 0 4%; }
+      .nav-links { display: none; }
+      .hero-content { padding: 100px 4% 60px; }
+      .hero-stats { flex-wrap: wrap; gap: 20px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .contact-form { padding: 28px; }
+      .footer-grid { grid-template-columns: 1fr; }
+      #fonctionnalites, #comment-ca-marche, #tarifs, #confiance, #contact { padding: 64px 4%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAVBAR ───────────────────────────────────────────────── -->
+  <nav id="navbar">
+    <a href="#accueil" class="nav-logo">
+      <div class="nav-logo-mark">SP</div>
+      <span class="nav-logo-text">Salam<span>Pay</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#fonctionnalites">Fonctionnalités</a></li>
+      <li><a href="#comment-ca-marche">Comment ça marche</a></li>
+      <li><a href="#tarifs">Tarifs</a></li>
+      <li><a href="#contact">Contact</a></li>
+      <li><a href="#contact" class="nav-cta">Démarrer gratuitement</a></li>
+    </ul>
+  </nav>
+
+  <!-- ── HERO ─────────────────────────────────────────────────── -->
+  <section id="accueil">
+    <div class="hero-pattern"></div>
+    <div class="hero-orb"></div>
+
+    <div class="hero-content">
+      <div class="hero-text">
+        <div class="hero-badge">Paiement marchand en ligne</div>
+        <h1 class="hero-title">
+          Encaissez partout,<br>
+          <span class="gold">sans frontières</span><br>
+          <span class="outline">sans limites</span>
+        </h1>
+        <p class="hero-subtitle">
+          SalamPay est la solution de paiement en ligne conçue pour les marchands africains. Acceptez les paiements en quelques secondes, en toute sécurité, depuis n'importe quel appareil.
+        </p>
+        <div class="hero-actions">
+          <a href="#contact" class="btn-primary">
+            <span>Ouvrir un compte</span>
+            <span>→</span>
+          </a>
+          <a href="#fonctionnalites" class="btn-secondary">
+            <span>Voir la démo</span>
+          </a>
+        </div>
+
+        <div class="hero-stats">
+          <div>
+            <div class="hero-stat-value">2M<span>+</span></div>
+            <div class="hero-stat-label">Transactions traitées</div>
+          </div>
+          <div>
+            <div class="hero-stat-value">98<span>%</span></div>
+            <div class="hero-stat-label">Taux de succès</div>
+          </div>
+          <div>
+            <div class="hero-stat-value">1<span>s</span></div>
+            <div class="hero-stat-label">Délai de traitement</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <!-- Dashboard card -->
+        <div class="dashboard-card">
+          <div class="dash-header">
+            <span class="dash-title">Revenus du mois</span>
+            <span class="dash-status">En direct</span>
+          </div>
+          <div class="dash-amount"><span>GNF</span> 48 750 000</div>
+          <div class="dash-change">↑ +23,4% vs mois dernier</div>
+          <div class="mini-chart">
+            <div class="bar" style="height:40%"></div>
+            <div class="bar" style="height:60%"></div>
+            <div class="bar" style="height:45%"></div>
+            <div class="bar active" style="height:80%"></div>
+            <div class="bar" style="height:55%"></div>
+            <div class="bar" style="height:70%"></div>
+            <div class="bar active" style="height:100%"></div>
+            <div class="bar" style="height:65%"></div>
+          </div>
+        </div>
+
+        <!-- Stats mini -->
+        <div class="stats-row">
+          <div class="stat-mini">
+            <div class="stat-mini-label">Paiements aujourd'hui</div>
+            <div class="stat-mini-value">1 284 <small>txn</small></div>
+          </div>
+          <div class="stat-mini">
+            <div class="stat-mini-label">Taux de conversion</div>
+            <div class="stat-mini-value">97,8 <small>%</small></div>
+          </div>
+        </div>
+
+        <!-- Transaction feed -->
+        <div class="dashboard-card">
+          <div class="dash-header">
+            <span class="dash-title">Dernières transactions</span>
+          </div>
+          <div class="tx-list">
+            <div class="tx-item">
+              <div class="tx-left">
+                <div class="tx-icon">🛍</div>
+                <div>
+                  <div class="tx-name">Boutique Alpha</div>
+                  <div class="tx-time">Il y a 2 min</div>
+                </div>
+              </div>
+              <div class="tx-amount positive">+85 000 GNF</div>
+            </div>
+            <div class="tx-item">
+              <div class="tx-left">
+                <div class="tx-icon">🍽</div>
+                <div>
+                  <div class="tx-name">Restaurant Le Palm</div>
+                  <div class="tx-time">Il y a 5 min</div>
+                </div>
+              </div>
+              <div class="tx-amount positive">+42 000 GNF</div>
+            </div>
+            <div class="tx-item">
+              <div class="tx-left">
+                <div class="tx-icon">📦</div>
+                <div>
+                  <div class="tx-name">E-shop Conakry</div>
+                  <div class="tx-time">Il y a 11 min</div>
+                </div>
+              </div>
+              <div class="tx-amount positive">+210 000 GNF</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FEATURES ─────────────────────────────────────────────── -->
+  <section id="fonctionnalites">
+    <div style="max-width:1200px; margin:0 auto;">
+      <p class="section-eyebrow">Pourquoi SalamPay</p>
+      <h2 class="section-title">Tout ce dont votre business a besoin</h2>
+      <p class="section-desc">Une infrastructure de paiement complète, fiable et sécurisée — construite pour les commerçants africains d'aujourd'hui.</p>
+
+      <div class="features-grid">
+        <div class="feature-card fade-up">
+          <div class="feature-icon">⚡</div>
+          <h3 class="feature-title">Paiement instantané</h3>
+          <p class="feature-desc">Vos clients paient en moins de 3 secondes. Mobile Money, carte bancaire, virement — tous les modes acceptés en un seul point d'intégration.</p>
+        </div>
+        <div class="feature-card fade-up">
+          <div class="feature-icon">🔒</div>
+          <h3 class="feature-title">Sécurité certifiée</h3>
+          <p class="feature-desc">Chiffrement SSL 256 bits, conformité PCI-DSS et authentification 3D Secure. Vos transactions et celles de vos clients sont protégées à chaque étape.</p>
+        </div>
+        <div class="feature-card fade-up">
+          <div class="feature-icon">📊</div>
+          <h3 class="feature-title">Tableau de bord live</h3>
+          <p class="feature-desc">Visualisez vos ventes, analysez vos performances et exportez vos rapports comptables en temps réel depuis votre espace marchand.</p>
+        </div>
+        <div class="feature-card fade-up">
+          <div class="feature-icon">🌍</div>
+          <h3 class="feature-title">Multi-devises</h3>
+          <p class="feature-desc">Acceptez GNF, USD, EUR, XOF et plus. SalamPay convertit automatiquement au meilleur taux de change disponible sur le marché.</p>
+        </div>
+        <div class="feature-card fade-up">
+          <div class="feature-icon">🔌</div>
+          <h3 class="feature-title">API & Plugins</h3>
+          <p class="feature-desc">Intégration en quelques lignes de code. Plugins natifs pour WooCommerce, PrestaShop, Shopify. Documentation complète fournie.</p>
+        </div>
+        <div class="feature-card fade-up">
+          <div class="feature-icon">📲</div>
+          <h3 class="feature-title">Lien de paiement</h3>
+          <p class="feature-desc">Générez un lien de paiement en 10 secondes et partagez-le sur WhatsApp, email ou vos réseaux sociaux — sans aucun site web.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── HOW IT WORKS ──────────────────────────────────────────── -->
+  <section id="comment-ca-marche">
+    <div style="max-width:1200px; margin:0 auto; position:relative; z-index:1;">
+      <p class="section-eyebrow">Processus simple</p>
+      <h2 class="section-title" style="color:var(--white);">Opérationnel en 24 heures</h2>
+      <p class="section-desc" style="color:rgba(255,255,255,0.45); margin-bottom:72px;">Pas de paperasse interminable. Pas de technique complexe. Juste quatre étapes pour commencer à encaisser.</p>
+
+      <div class="steps-grid">
+        <div class="step fade-up">
+          <div class="step-number">1</div>
+          <h3 class="step-title">Créez votre compte</h3>
+          <p class="step-desc">Inscription en ligne en 5 minutes. Renseignez les informations de votre entreprise et vérifiez votre identité.</p>
+        </div>
+        <div class="step fade-up">
+          <div class="step-number">2</div>
+          <h3 class="step-title">Intégrez la solution</h3>
+          <p class="step-desc">Copiez-collez notre code ou installez notre plugin. Notre équipe technique vous accompagne si besoin.</p>
+        </div>
+        <div class="step fade-up">
+          <div class="step-number">3</div>
+          <h3 class="step-title">Acceptez les paiements</h3>
+          <p class="step-desc">Vos clients paient en ligne, par lien ou en point de vente. Chaque transaction est confirmée instantanément.</p>
+        </div>
+        <div class="step fade-up">
+          <div class="step-number">4</div>
+          <h3 class="step-title">Recevez vos fonds</h3>
+          <p class="step-desc">Virement automatique sur votre compte bancaire ou Mobile Money selon votre fréquence choisie (J+1 ou hebdo).</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PRICING ───────────────────────────────────────────────── -->
+  <section id="tarifs">
+    <div style="max-width:1100px; margin:0 auto;">
+      <p class="section-eyebrow" style="text-align:center;">Tarification transparente</p>
+      <h2 class="section-title" style="max-width:100%; text-align:center; margin:0 auto 12px;">Un tarif honnête, sans surprise</h2>
+      <p class="section-desc" style="text-align:center; margin: 0 auto 60px;">Aucun frais caché. Vous payez uniquement ce que vous utilisez.</p>
+
+      <div class="pricing-grid">
+        <!-- Starter -->
+        <div class="pricing-card">
+          <p class="pricing-name">Starter</p>
+          <p class="pricing-tagline">Idéal pour démarrer</p>
+          <div class="pricing-amount">
+            <span class="currency">GNF</span>
+            <span class="number">0</span>
+            <span class="unit"> /mois</span>
+          </div>
+          <div class="pricing-commission">Commission : 2,5% par transaction</div>
+          <div class="pricing-divider"></div>
+          <ul class="pricing-features">
+            <li>Jusqu'à 500 transactions/mois</li>
+            <li>Lien de paiement partageable</li>
+            <li>Dashboard basique</li>
+            <li>Mobile Money & carte bancaire</li>
+            <li>Support par email</li>
+            <li>Virements hebdomadaires</li>
+          </ul>
+          <a href="#contact" class="pricing-btn pricing-btn-outline">Démarrer gratuitement</a>
+        </div>
+
+        <!-- Business (featured) -->
+        <div class="pricing-card featured">
+          <div class="pricing-badge">⭐ Le plus populaire</div>
+          <p class="pricing-name">Business</p>
+          <p class="pricing-tagline">Pour les marchands actifs</p>
+          <div class="pricing-amount">
+            <span class="currency" style="color:var(--gold);">GNF</span>
+            <span class="number">150 000</span>
+            <span class="unit"> /mois</span>
+          </div>
+          <div class="pricing-commission">Commission : 1,5% par transaction</div>
+          <div class="pricing-divider"></div>
+          <ul class="pricing-features">
+            <li>Transactions illimitées</li>
+            <li>API complète & webhooks</li>
+            <li>Dashboard analytics avancé</li>
+            <li>Multi-devises (GNF, USD, EUR, XOF)</li>
+            <li>Plugins e-commerce inclus</li>
+            <li>Support prioritaire 7j/7</li>
+            <li>Virements J+1</li>
+            <li>Rapports comptables export</li>
+          </ul>
+          <a href="#contact" class="pricing-btn pricing-btn-solid">Choisir Business</a>
+        </div>
+
+        <!-- Enterprise -->
+        <div class="pricing-card">
+          <p class="pricing-name">Entreprise</p>
+          <p class="pricing-tagline">Grands volumes & groupes</p>
+          <div class="pricing-amount">
+            <span class="number" style="font-size:36px; line-height:1.3;">Sur mesure</span>
+          </div>
+          <div class="pricing-commission">Commission : négociée selon volume</div>
+          <div class="pricing-divider"></div>
+          <ul class="pricing-features">
+            <li>Volume illimité & haute disponibilité</li>
+            <li>Infrastructure dédiée</li>
+            <li>Intégration personnalisée</li>
+            <li>Manager de compte dédié</li>
+            <li>SLA garanti 99,99%</li>
+            <li>Reporting sur mesure</li>
+            <li>Virements quotidiens</li>
+            <li>Formation équipe incluse</li>
+          </ul>
+          <a href="#contact" class="pricing-btn pricing-btn-outline">Nous contacter</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TRUST ─────────────────────────────────────────────────── -->
+  <section id="confiance">
+    <div style="max-width:1100px; margin:0 auto;">
+      <h2 class="trust-title">Des marchands nous font confiance<br>à travers toute l'Afrique de l'Ouest</h2>
+      <div class="trust-stats">
+        <div class="fade-up">
+          <div class="trust-stat-val">+8 500</div>
+          <div class="trust-stat-label">Marchands actifs</div>
+        </div>
+        <div class="fade-up">
+          <div class="trust-stat-val">12</div>
+          <div class="trust-stat-label">Pays couverts</div>
+        </div>
+        <div class="fade-up">
+          <div class="trust-stat-val">99,9%</div>
+          <div class="trust-stat-label">Disponibilité plateforme</div>
+        </div>
+        <div class="fade-up">
+          <div class="trust-stat-val">24/7</div>
+          <div class="trust-stat-label">Support client</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CONTACT ───────────────────────────────────────────────── -->
+  <section id="contact">
+    <div style="max-width:1100px; margin:0 auto;">
+      <div class="contact-grid">
+        <div>
+          <p class="section-eyebrow">Parlons-en</p>
+          <h2 class="contact-info-title">Prêt à encaisser<br><span>sans limites ?</span></h2>
+          <p class="contact-info-desc">Notre équipe répond sous 2h ouvrées. Que vous soyez en phase de démarrage ou à la tête d'une grande enseigne, nous avons une solution pour vous.</p>
+
+          <div class="contact-detail">
+            <div class="contact-detail-icon">📧</div>
+            <div>
+              <div class="contact-detail-label">Email</div>
+              <div class="contact-detail-value">contact@salampay.com</div>
+            </div>
+          </div>
+          <div class="contact-detail">
+            <div class="contact-detail-icon">📞</div>
+            <div>
+              <div class="contact-detail-label">Téléphone</div>
+              <div class="contact-detail-value">+224 620 000 000</div>
+            </div>
+          </div>
+          <div class="contact-detail">
+            <div class="contact-detail-icon">📍</div>
+            <div>
+              <div class="contact-detail-label">Adresse</div>
+              <div class="contact-detail-value">Kaloum, Conakry, Guinée</div>
+            </div>
+          </div>
+          <div class="contact-detail">
+            <div class="contact-detail-icon">🕐</div>
+            <div>
+              <div class="contact-detail-label">Heures d'ouverture</div>
+              <div class="contact-detail-value">Lun–Sam, 8h–20h (GMT)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-form">
+          <h3 class="form-title">Démarrez votre intégration</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Prénom</label>
+              <input type="text" placeholder="Mamadou" />
+            </div>
+            <div class="form-group">
+              <label>Nom</label>
+              <input type="text" placeholder="Diallo" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Email professionnel</label>
+            <input type="email" placeholder="vous@votre-boutique.com" />
+          </div>
+          <div class="form-group">
+            <label>Nom de l'entreprise</label>
+            <input type="text" placeholder="Ma Boutique SARL" />
+          </div>
+          <div class="form-group">
+            <label>Volume mensuel estimé</label>
+            <select>
+              <option value="">Choisissez une tranche</option>
+              <option>Moins de 5 000 000 GNF</option>
+              <option>5 000 000 – 50 000 000 GNF</option>
+              <option>50 000 000 – 200 000 000 GNF</option>
+              <option>Plus de 200 000 000 GNF</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Votre message (optionnel)</label>
+            <textarea placeholder="Décrivez votre projet ou vos besoins spécifiques…"></textarea>
+          </div>
+          <button class="form-submit" onclick="handleSubmit(event)">Envoyer ma demande →</button>
+          <p class="form-note">En envoyant ce formulaire, vous acceptez notre <a href="#">politique de confidentialité</a>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ────────────────────────────────────────────────── -->
+  <footer>
+    <div style="max-width:1200px; margin:0 auto; position:relative;">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-logo">
+            <div class="nav-logo-mark">SP</div>
+            <span class="footer-logo-text">Salam<span>Pay</span></span>
+          </div>
+          <p class="footer-desc">La solution de paiement marchand en ligne pensée pour l'Afrique. Rapide, sécurisée et accessible à tous les commerçants.</p>
+        </div>
+        <div>
+          <p class="footer-col-title">Produit</p>
+          <ul class="footer-links">
+            <li><a href="#fonctionnalites">Fonctionnalités</a></li>
+            <li><a href="#tarifs">Tarifs</a></li>
+            <li><a href="#comment-ca-marche">Comment ça marche</a></li>
+            <li><a href="#">Documentation API</a></li>
+            <li><a href="#">Statut des services</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="footer-col-title">Entreprise</p>
+          <ul class="footer-links">
+            <li><a href="#">À propos</a></li>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">Partenaires</a></li>
+            <li><a href="#">Carrières</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="footer-col-title">Légal</p>
+          <ul class="footer-links">
+            <li><a href="#">Conditions générales</a></li>
+            <li><a href="#">Confidentialité</a></li>
+            <li><a href="#">Sécurité</a></li>
+            <li><a href="#">Conformité</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p class="footer-copy">© 2026 <span>SalamPay</span>. Tous droits réservés. Conakry, Guinée.</p>
+        <div class="footer-socials">
+          <a class="social-btn" href="#" title="LinkedIn">in</a>
+          <a class="social-btn" href="#" title="Twitter">𝕏</a>
+          <a class="social-btn" href="#" title="Facebook">f</a>
+          <a class="social-btn" href="#" title="WhatsApp">💬</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Navbar scroll effect
+    const nav = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 20);
+    });
+
+    // Intersection Observer for fade-up animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    // Form submission
+    function handleSubmit(e) {
+      e.preventDefault();
+      const btn = e.target;
+      btn.textContent = '✓ Demande envoyée !';
+      btn.style.background = 'linear-gradient(135deg, #4ADE80, #16A34A)';
+      btn.style.pointerEvents = 'none';
+      setTimeout(() => {
+        btn.textContent = 'Envoyer ma demande →';
+        btn.style.background = '';
+        btn.style.pointerEvents = '';
+      }, 4000);
+    }
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
